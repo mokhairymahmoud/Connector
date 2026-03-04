@@ -26,6 +26,8 @@ dependencies {
     api(project(":extensions:control-plane:store:sql:transfer-process-store-sql"))
     api(project(":extensions:common:store:sql:edr-index-sql"))
     api(project(":extensions:common:store:sql:jti-validation-store-sql"))
+    api(project(":extensions:store:sql:federated-catalog-cache-sql"))
+    api(project(":extensions:store:sql:target-node-directory-sql"))
     api(project(":extensions:data-plane-selector:store:sql:data-plane-instance-store-sql"))
     api(project(":extensions:policy-monitor:store:sql:policy-monitor-store-sql"))
 

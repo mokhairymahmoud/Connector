@@ -54,7 +54,12 @@ dependencies {
     api(project(":extensions:control-plane:callback:callback-http-dispatcher"))
     api(project(":extensions:control-plane:callback:callback-static-endpoint"))
     api(project(":extensions:control-plane:edr:edr-store-receiver"))
+    api(project(":extensions:api:federated-catalog-api"))
 
+    // federated catalog dependencies
+    api(project(":spi:federated-catalog-spi"))
+    api(project(":core:federated-catalog-core"))
+    api(project(":core:federated-catalog-core-2025"))
 
     // libs
     api(project(":core:common:lib:transform-lib"))
