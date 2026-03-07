@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+ *  Copyright (c) 2022 Microsoft Corporation
  *
  *  This program and the accompanying materials are made available under the
  *  terms of the Apache License, Version 2.0 which is available at
@@ -8,7 +8,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  *
  *  Contributors:
- *       Bayerische Motoren Werke Aktiengesellschaft (BMW AG) - management API integration
+ *       Microsoft Corporation - initial API and implementation
  *
  */
 
@@ -20,6 +20,7 @@ import org.eclipse.edc.catalog.spi.QueryService;
 import org.eclipse.edc.catalog.test.TestUtil;
 import org.eclipse.edc.connector.controlplane.catalog.spi.Dataset;
 import org.eclipse.edc.json.JacksonTypeManager;
+import org.eclipse.edc.junit.annotations.ApiTest;
 import org.eclipse.edc.protocol.dsp.catalog.transform.from.JsonObjectFromDataServiceTransformer;
 import org.eclipse.edc.protocol.dsp.catalog.transform.from.JsonObjectFromDatasetTransformer;
 import org.eclipse.edc.protocol.dsp.catalog.transform.from.JsonObjectFromDistributionTransformer;
@@ -28,16 +29,13 @@ import org.eclipse.edc.spi.query.QuerySpec;
 import org.eclipse.edc.spi.result.ServiceResult;
 import org.eclipse.edc.transform.TypeTransformerRegistryImpl;
 import org.eclipse.edc.transform.transformer.edc.to.JsonObjectToQuerySpecTransformer;
-import org.eclipse.edc.validator.spi.JsonObjectValidatorRegistry;
-import org.eclipse.edc.validator.spi.ValidationResult;
-import org.eclipse.edc.validator.spi.Violation;
 import org.eclipse.edc.web.jersey.testfixtures.RestControllerTestBase;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
 
+import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static java.util.Collections.emptyList;
 import static java.util.stream.IntStream.range;
@@ -53,26 +51,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public abstract class BaseFederatedCatalogApiControllerTest extends RestControllerTestBase {
+@ApiTest
+class FederatedCatalogApiControllerTest extends RestControllerTestBase {
 
-    protected final QueryService queryService = mock();
-    protected final JsonObjectValidatorRegistry validatorRegistry = mock();
-    protected final TypeTransformerRegistryImpl transformerRegistry = new TypeTransformerRegistryImpl();
-
-    @BeforeEach
-    void setUp() {
-        var factory = Json.createBuilderFactory(Map.of());
-        var typeManager = new JacksonTypeManager();
-        var participantIdMapper = new TestUtil.NoOpParticipantIdMapper();
-
-        transformerRegistry.register(new JsonObjectFromCatalogV2025Transformer(factory, typeManager, JSON_LD, participantIdMapper, DSP_NAMESPACE_V_2025_1));
-        transformerRegistry.register(new JsonObjectFromDatasetTransformer(factory, typeManager, JSON_LD));
-        transformerRegistry.register(new JsonObjectFromDistributionTransformer(factory));
-        transformerRegistry.register(new JsonObjectFromDataServiceTransformer(factory));
-        transformerRegistry.register(new JsonObjectToQuerySpecTransformer());
-
-        when(validatorRegistry.validate(any(), any())).thenReturn(ValidationResult.success());
-    }
+    private static final String PATH = "/v1alpha/catalog/query";
+    private final QueryService queryService = mock();
 
     @Test
     void queryApi_whenEmptyResult() {
@@ -81,7 +64,7 @@ public abstract class BaseFederatedCatalogApiControllerTest extends RestControll
         baseRequest()
                 .contentType(JSON)
                 .body("{}")
-                .post("/catalog/query")
+                .post(PATH)
                 .then()
                 .log().ifValidationFails()
                 .statusCode(200)
@@ -97,7 +80,7 @@ public abstract class BaseFederatedCatalogApiControllerTest extends RestControll
         baseRequest()
                 .contentType(JSON)
                 .body("{}")
-                .post("/catalog/query")
+                .post(PATH)
                 .then()
                 .log().ifValidationFails()
                 .statusCode(200)
@@ -112,7 +95,7 @@ public abstract class BaseFederatedCatalogApiControllerTest extends RestControll
         baseRequest()
                 .contentType(JSON)
                 .body("{}")
-                .post("/catalog/query")
+                .post(PATH)
                 .then()
                 .statusCode(500);
     }
@@ -132,7 +115,7 @@ public abstract class BaseFederatedCatalogApiControllerTest extends RestControll
         var response = baseRequest()
                 .contentType(JSON)
                 .body("{}")
-                .post("/catalog/query?flatten=true")
+                .post(PATH + "?flatten=true")
                 .then()
                 .log().ifValidationFails()
                 .statusCode(200)
@@ -155,7 +138,7 @@ public abstract class BaseFederatedCatalogApiControllerTest extends RestControll
 
         baseRequest()
                 .contentType(JSON)
-                .post("/catalog/query")
+                .post(PATH)
                 .then()
                 .log().ifValidationFails()
                 .statusCode(200)
@@ -165,17 +148,23 @@ public abstract class BaseFederatedCatalogApiControllerTest extends RestControll
         verify(queryService).getCatalog(QuerySpec.none());
     }
 
-    @Test
-    void queryApi_whenQueryValidationFails() {
-        when(validatorRegistry.validate(any(), any())).thenReturn(ValidationResult.failure(Violation.violation("bad request", "$")));
-
-        baseRequest()
-                .contentType(JSON)
-                .body("{}")
-                .post("/catalog/query")
-                .then()
-                .statusCode(400);
+    @Override
+    protected Object controller() {
+        var typeTransformerRegistry = new TypeTransformerRegistryImpl();
+        var factory = Json.createBuilderFactory(Map.of());
+        var mapper = new JacksonTypeManager();
+        var participantIdMapper = new TestUtil.NoOpParticipantIdMapper();
+        typeTransformerRegistry.register(new JsonObjectFromCatalogV2025Transformer(factory, new JacksonTypeManager(), JSON_LD, participantIdMapper, DSP_NAMESPACE_V_2025_1));
+        typeTransformerRegistry.register(new JsonObjectFromDatasetTransformer(factory, mapper, JSON_LD));
+        typeTransformerRegistry.register(new JsonObjectFromDistributionTransformer(factory));
+        typeTransformerRegistry.register(new JsonObjectFromDataServiceTransformer(factory));
+        typeTransformerRegistry.register(new JsonObjectToQuerySpecTransformer());
+        return new FederatedCatalogApiController(queryService, typeTransformerRegistry);
     }
 
-    protected abstract RequestSpecification baseRequest();
+    private RequestSpecification baseRequest() {
+        return given()
+                .baseUri("http://localhost:" + port)
+                .when();
+    }
 }

@@ -23,9 +23,9 @@ dependencies {
     api(project(":spi:control-plane:contract-spi"))
     api(project(":data-protocols:dsp:dsp-2025:dsp-spi-2025"))
 
+    implementation(project(":spi:common:boot-spi"))
     implementation(project(":core:common:lib:api-lib"))
     implementation(project(":core:common:lib:catalog-util-lib"))
-    implementation(project(":extensions:common:api:lib:management-api-lib"))
     implementation(project(":extensions:common:http:lib:jersey-providers-lib"))
     implementation(project(":spi:common:transform-spi"))
     implementation(project(":spi:common:web-spi"))
@@ -53,6 +53,6 @@ dependencies {
 
 edcBuild {
     swagger {
-        apiGroup.set("management-api")
+        apiGroup.set("catalog-api")
     }
 }

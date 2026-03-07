@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+ *  Copyright (c) 2022 Microsoft Corporation
  *
  *  This program and the accompanying materials are made available under the
  *  terms of the Apache License, Version 2.0 which is available at
@@ -8,7 +8,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  *
  *  Contributors:
- *       Bayerische Motoren Werke Aktiengesellschaft (BMW AG) - management API integration
+ *       Microsoft Corporation - initial API and implementation
  *
  */
 
@@ -16,6 +16,12 @@ package org.eclipse.edc.catalog.api.query;
 
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import org.eclipse.edc.catalog.spi.QueryService;
 import org.eclipse.edc.connector.controlplane.catalog.spi.Catalog;
 import org.eclipse.edc.federatedcatalog.util.FederatedCatalogUtil;
@@ -23,36 +29,32 @@ import org.eclipse.edc.spi.query.QuerySpec;
 import org.eclipse.edc.spi.result.AbstractResult;
 import org.eclipse.edc.spi.result.Result;
 import org.eclipse.edc.transform.spi.TypeTransformerRegistry;
-import org.eclipse.edc.validator.spi.JsonObjectValidatorRegistry;
 import org.eclipse.edc.web.spi.exception.InvalidRequestException;
-import org.eclipse.edc.web.spi.exception.ValidationFailureException;
 
 import static jakarta.json.stream.JsonCollectors.toJsonArray;
-import static org.eclipse.edc.spi.query.QuerySpec.EDC_QUERY_SPEC_TYPE;
+import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.edc.web.spi.exception.ServiceResultHandler.exceptionMapper;
 
-public abstract class BaseFederatedCatalogApiController {
+@Consumes(APPLICATION_JSON)
+@Produces(APPLICATION_JSON)
+@Path("/v1alpha/catalog/query")
+public class FederatedCatalogApiController implements FederatedCatalogApi {
 
     private final QueryService queryService;
     private final TypeTransformerRegistry transformerRegistry;
-    private final JsonObjectValidatorRegistry validatorRegistry;
 
-    protected BaseFederatedCatalogApiController(QueryService queryService, TypeTransformerRegistry transformerRegistry,
-                                                JsonObjectValidatorRegistry validatorRegistry) {
+    public FederatedCatalogApiController(QueryService queryService, TypeTransformerRegistry transformerRegistry) {
         this.queryService = queryService;
         this.transformerRegistry = transformerRegistry;
-        this.validatorRegistry = validatorRegistry;
     }
 
-    protected JsonArray queryCachedCatalog(JsonObject querySpecJson, boolean flatten) {
-        QuerySpec querySpec;
-        if (querySpecJson == null) {
-            querySpec = QuerySpec.none();
-        } else {
-            validatorRegistry.validate(EDC_QUERY_SPEC_TYPE, querySpecJson).orElseThrow(ValidationFailureException::new);
-            querySpec = transformerRegistry.transform(querySpecJson, QuerySpec.class)
-                    .orElseThrow(InvalidRequestException::new);
-        }
+    @Override
+    @POST
+    public JsonArray getCachedCatalog(JsonObject querySpecJson, @DefaultValue("false") @QueryParam("flatten") boolean flatten) {
+        var querySpec = querySpecJson == null
+                ? QuerySpec.none()
+                : transformerRegistry.transform(querySpecJson, QuerySpec.class)
+                        .orElseThrow(InvalidRequestException::new);
 
         return queryService.getCatalog(querySpec)
                 .orElseThrow(exceptionMapper(Catalog.class))
