@@ -19,11 +19,18 @@ plugins {
 
 dependencies {
     api(project(":core:federated-catalog-core"))
+    implementation(project(":core:common:lib:transform-lib"))
+    implementation(project(":core:control-plane:control-plane-transform"))
+    implementation(project(":data-protocols:dsp:dsp-lib:dsp-catalog-lib:dsp-catalog-transform-lib"))
     implementation(project(":data-protocols:dsp:dsp-2025:dsp-catalog-2025:dsp-catalog-transform-2025"))
+    implementation(project(":spi:common:participant-spi"))
+    implementation(project(":core:common:lib:json-ld-lib"))
 
     testImplementation(libs.awaitility)
     testImplementation(project(":core:common:junit"))
-    implementation(project(":core:common:lib:json-ld-lib"))
+    testImplementation(project(":core:common:lib:json-lib"))
+    testImplementation(project(":core:common:lib:json-ld-lib"))
+    testImplementation(project(":core:common:lib:transform-lib"))
     testImplementation(testFixtures(project(":spi:federated-catalog-spi")))
     testImplementation(testFixtures(project(":spi:crawler-spi")))
     testImplementation(testFixtures(project(":core:federated-catalog-core")))

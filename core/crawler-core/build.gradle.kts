@@ -23,8 +23,7 @@ dependencies {
     api(project(":spi:common:core-spi"))
     api(project(":spi:common:web-spi"))
     api(project(":spi:control-plane:contract-spi"))
-
-
+    testFixturesImplementation(project(":spi:control-plane:contract-spi"))
     testImplementation(project(":core:common:junit"))
     testImplementation(project(":extensions:common:http"))
     testImplementation(libs.awaitility)

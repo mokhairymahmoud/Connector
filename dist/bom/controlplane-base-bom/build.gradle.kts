@@ -55,7 +55,6 @@ dependencies {
     api(project(":extensions:control-plane:callback:callback-static-endpoint"))
     api(project(":extensions:control-plane:edr:edr-store-receiver"))
 
-
     // libs
     api(project(":core:common:lib:transform-lib"))
 }

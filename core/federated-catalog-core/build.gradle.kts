@@ -18,25 +18,26 @@ plugins {
 }
 
 dependencies {
+    api(project(":core:crawler-core"))
     api(project(":spi:common:core-spi"))
+    api(project(":spi:common:json-ld-spi"))
+    api(project(":spi:common:participant-context-single-spi"))
+    api(project(":spi:common:transform-spi"))
     api(project(":spi:common:web-spi"))
     api(project(":spi:control-plane:catalog-spi"))
     api(project(":data-protocols:dsp:dsp-spi"))
-    api(project(":spi:common:participant-context-single-spi"))
-    api(project(":core:crawler-core"))
     api(project(":spi:federated-catalog-spi"))
     api(project(":core:common:lib:catalog-util-lib"))
     api(project(":data-protocols:dsp:dsp-lib:dsp-catalog-lib:dsp-catalog-transform-lib"))
     api(project(":core:control-plane:control-plane-transform"))
     api(project(":core:common:lib:transform-lib"))
     api(project(":core:common:lib:query-lib"))
+    api(libs.jackson.databind)
 
+    implementation(project(":core:common:lib:store-lib"))
     implementation(project(":core:common:lib:util-lib"))
     implementation(project(":data-protocols:dsp:dsp-2025:dsp-http-api-configuration-2025"))
-    implementation(project(":spi:common:json-ld-spi"))
     implementation(project(":core:common:lib:json-ld-lib"))
-    implementation(project(":core:common:lib:store-lib"))
-
     testImplementation(project(":core:common:junit"))
     testImplementation(project(":extensions:common:http"))
     testImplementation(libs.awaitility)
@@ -49,4 +50,6 @@ dependencies {
     testFixturesImplementation(project(":core:control-plane:control-plane-transform"))
     testFixturesImplementation(project(":data-protocols:dsp:dsp-lib:dsp-catalog-lib:dsp-catalog-transform-lib"))
     testFixturesImplementation(project(":data-protocols:dsp:dsp-2025:dsp-catalog-2025:dsp-catalog-transform-2025"))
+    testFixturesImplementation(project(":spi:common:participant-spi"))
+    testFixturesImplementation(project(":spi:common:policy-model"))
 }

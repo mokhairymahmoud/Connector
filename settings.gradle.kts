@@ -321,6 +321,13 @@ include(":system-tests:version-api:version-api-test-runtime")
 include(":dist:bom:controlplane-base-bom")
 include(":dist:bom:controlplane-dcp-bom")
 include(":dist:bom:controlplane-feature-sql-bom")
+include(":dist:bom:federatedcatalog-base-bom")
+include(":dist:bom:federatedcatalog-dcp-bom")
+include(":dist:bom:federatedcatalog-feature-sql-bom")
 
 include(":dist:bom:dataplane-base-bom")
 include(":dist:bom:dataplane-feature-sql-bom")
+
+project(":extensions:federated-catalog:store:sql:federated-catalog-cache-sql").projectDir = file("extensions/store/sql/federated-catalog-cache-sql")
+project(":extensions:federated-catalog:store:sql:target-node-directory-sql").projectDir = file("extensions/store/sql/target-node-directory-sql")
+project(":extensions:federated-catalog:api:federated-catalog-api").projectDir = file("extensions/api/federated-catalog-api")

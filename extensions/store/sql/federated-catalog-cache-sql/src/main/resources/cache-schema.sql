@@ -12,19 +12,10 @@
  *
  */
 
-plugins {
-    java
-}
-
-dependencies {
-    testImplementation(project(":core:common:junit"))
-    testImplementation(project(":core:common:lib:boot-lib"))
-    testImplementation(project(":spi:common:protocol-spi"))
-    testImplementation(libs.restAssured)
-    testImplementation(libs.awaitility)
-    testImplementation(libs.wiremock)
-}
-
-edcBuild {
-    publish.set(false)
-}
+-- only intended for and tested with Postgres!
+CREATE TABLE IF NOT EXISTS edc_federated_catalog
+(
+    id                    VARCHAR PRIMARY KEY NOT NULL,
+    catalog               JSON,
+    marked                BOOLEAN DEFAULT FALSE
+);
